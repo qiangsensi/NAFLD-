@@ -2,3 +2,4 @@ shap
 numpy
 pandas
 streamlit
+matplotlib
