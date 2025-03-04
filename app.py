@@ -32,9 +32,9 @@ def load_data():
     return data
 
 # 主函数
+# 主函数
 def main():
     st.title("基于随机森林算法的NAFLD临床诊断预测模型")
-    # st.write("这是一个基于随机森林模型解释和预测应用。")
 
     # 加载模型和数据
     model = load_model()
@@ -63,21 +63,22 @@ def main():
 
     # 预测
     if st.sidebar.button("预测"):
-        prediction = model.predict(scaled_input)
-        st.success(f"预测结果: {prediction}")
+        # 修改为获取预测概率
+        proba = model.predict_proba(scaled_input)
+        nafld_prob = proba[0][1] * 100  # 假设第二类是NAFLD
+        
+        # 显示概率结果
+        st.success(f"预测为NAFLD的概率为: {nafld_prob:.2f}%")
 
-        # SHAP 解释
+        # SHAP 解释（保持原有逻辑不变）
         explainer = shap.Explainer(model, scaled_data)
         shap_values = explainer(scaled_input)
 
-        # 检查 shap_values 的形状
-        # st.write(f"SHAP 值的形状: {shap_values.shape}")
-
-        #提取单个样本的shape值与期望值
+        # 提取单个样本的shape值与期望值
         shap_values_single = shap_values[0]
         expected_value = explainer.expected_value[0]
 
-        #创建explanation对象
+        # 创建explanation对象
         explanation = shap.Explanation(
             values=shap_values_single[:,0],
             base_values=expected_value,
@@ -85,7 +86,7 @@ def main():
             feature_names=data.columns.tolist() 
         )
 
-        shap.save_html("shap.html", shap.plots.force(explanation,show = False))
+        shap.save_html("shap.html", shap.plots.force(explanation, show=False))
 
         st.subheader("SHAP 值")
         with open("shap.html", 'r', encoding='utf-8') as f:
